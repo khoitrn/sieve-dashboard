@@ -1,33 +1,31 @@
 import type { HistoryEvent } from "@/lib/types";
 
+function formatTime(ts: string) {
+  const d = new Date(ts);
+  return `${d.toLocaleDateString(undefined, { month: "2-digit", day: "2-digit" })} · ${d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 export function HistoryTail({ history }: { history: HistoryEvent[] }) {
   const tail = history.slice(-8).reverse();
 
   return (
-    <div
-      className="rounded-lg border p-4"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-    >
-      <div className="text-sm font-medium">HISTORY.jsonl (latest)</div>
+    <section className="panel">
+      <h2 className="panel-eyebrow">
+        Recent activity <span className="count">&mdash; tail of HISTORY.jsonl</span>
+      </h2>
       {tail.length === 0 ? (
-        <p className="mt-2 text-xs" style={{ color: "var(--ink-muted)" }}>
-          No events logged yet.
-        </p>
+        <p style={{ color: "var(--ink-faint)", fontSize: 13 }}>No events logged yet.</p>
       ) : (
-        <ul className="mt-2 flex flex-col gap-2">
+        <ul className="log-list">
           {tail.map((e, i) => (
-            <li key={i} className="text-xs" style={{ color: "var(--ink-secondary)" }}>
-              <span className="font-mono" style={{ color: "var(--ink-muted)" }}>
-                {new Date(e.ts).toLocaleString()}
-              </span>{" "}
-              <span className="font-medium" style={{ color: "var(--ink-primary)" }}>
-                {e.event}
-              </span>
-              {typeof e.note === "string" && <span> — {e.note}</span>}
+            <li key={i} className="log-row">
+              <span className="log-time">{formatTime(e.ts)}</span>
+              <span className="log-event">{e.event}</span>
+              <span className="log-note">{typeof e.note === "string" ? e.note : ""}</span>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

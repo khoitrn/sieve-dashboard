@@ -1,60 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { fetchRaw } from "@/lib/github";
 
 const QUICK_PICKS = ["khoitrn/sieve", "khoitrn/khoitrn-web", "khoitrn/japan-journal"];
 
-export function RepoPicker({ current }: { current: string }) {
-  const [value, setValue] = useState(current);
+function go(repo: string) {
+  window.history.pushState(null, "", `/?repo=${encodeURIComponent(repo)}`);
+}
 
-  function go(repo: string) {
-    // Plain history.pushState, not router.push: this is a fully static export
-    // with no server to resolve an RSC navigation against, so search-param
-    // changes stay client-only per Next's documented SPA pattern.
-    window.history.pushState(null, "", `/?repo=${encodeURIComponent(repo)}`);
-  }
+export function RepoPicker({ current }: { current: string }) {
+  const [open, setOpen] = useState(false);
+  const [statuses, setStatuses] = useState<Record<string, boolean>>({});
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    QUICK_PICKS.forEach((repo) => {
+      if (statuses[repo] !== undefined) return;
+      const [owner, name] = repo.split("/");
+      fetchRaw(owner, name, "AGENTS.md").then((content) => {
+        setStatuses((prev) => ({ ...prev, [repo]: content !== null }));
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (value.trim()) go(value.trim());
-        }}
-        className="flex gap-2"
+    <div className="repo-picker" ref={rootRef}>
+      <button
+        className="repo-trigger mono"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
       >
-        <input
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="owner/repo"
-          className="w-64 rounded-md border px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[var(--domain-planning)]"
-          style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--ink-primary)" }}
-        />
-        <button
-          type="submit"
-          className="rounded-md px-3 py-1.5 text-sm font-medium text-white"
-          style={{ background: "var(--domain-planning)" }}
-        >
-          Load
-        </button>
-      </form>
-      <div className="flex flex-wrap gap-2">
-        {QUICK_PICKS.map((r) => (
-          <button
-            key={r}
-            onClick={() => go(r)}
-            className="rounded-full border px-3 py-1 text-xs"
-            style={{
-              borderColor: "var(--border)",
-              color: r === current ? "var(--ink-primary)" : "var(--ink-secondary)",
-              background: r === current ? "var(--surface)" : "transparent",
-              fontWeight: r === current ? 600 : 400,
-            }}
-          >
-            {r}
-          </button>
-        ))}
-      </div>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <circle cx="4.5" cy="3.5" r="2" />
+          <circle cx="4.5" cy="12.5" r="2" />
+          <circle cx="12" cy="8" r="2" />
+          <path d="M4.5 5.5v5" />
+          <path d="M4.5 8h5.5a2 2 0 0 0 2-2" />
+        </svg>
+        <span>{current}</span>
+        <svg className="chev" width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <path d="M4 6l4 4 4-4" />
+        </svg>
+      </button>
+      {open && (
+        <ul className="repo-list" role="listbox">
+          {QUICK_PICKS.map((repo) => {
+            const status = statuses[repo];
+            return (
+              <li
+                key={repo}
+                role="option"
+                aria-selected={repo === current}
+                onClick={() => {
+                  go(repo);
+                  setOpen(false);
+                }}
+              >
+                <span>{repo}</span>
+                <span className="dim">{status === undefined ? "…" : status ? "connected" : "no AGENTS.md"}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

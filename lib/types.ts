@@ -26,6 +26,7 @@ export interface HistoryEvent {
 export interface Bridge {
   agent: string;
   file: string;
+  active: boolean;
 }
 
 export interface RepoSnapshot {
@@ -36,4 +37,6 @@ export interface RepoSnapshot {
   history: HistoryEvent[];
   bridges: Bridge[];
   progressSummary: string | null;
+  staleCount: number;
+  proposedCount: number;
 }
