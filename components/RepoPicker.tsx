@@ -1,16 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const QUICK_PICKS = ["khoitrn/sieve", "khoitrn/khoitrn-web", "khoitrn/japan-journal"];
 
 export function RepoPicker({ current }: { current: string }) {
-  const router = useRouter();
   const [value, setValue] = useState(current);
 
   function go(repo: string) {
-    router.push(`/?repo=${encodeURIComponent(repo)}`);
+    // Plain history.pushState, not router.push: this is a fully static export
+    // with no server to resolve an RSC navigation against, so search-param
+    // changes stay client-only per Next's documented SPA pattern.
+    window.history.pushState(null, "", `/?repo=${encodeURIComponent(repo)}`);
   }
 
   return (

@@ -13,7 +13,7 @@ export async function fetchRaw(
 ): Promise<string | null> {
   const url = `${RAW_BASE}/${owner}/${repo}/HEAD/${path}`;
   try {
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url);
     if (!res.ok) return null;
     return await res.text();
   } catch {
