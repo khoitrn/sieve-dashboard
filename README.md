@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sieve dashboard
 
-## Getting Started
+A read-only website that shows whether a public GitHub repo is running the
+[Sieve](https://github.com/khoitrn/sieve) protocol — its skill catalog, which
+skills are guardrails vs. catalog, real mentions of each skill in the repo's
+own `HISTORY.jsonl`, and the protocol's file-based architecture.
 
-First, run the development server:
+Separate repo from `sievekit` on purpose: this is a hosted viewer of repos,
+not a feature of the npm package. Public repos only for now — no GitHub auth,
+no accounts, no stored data. Every load reads `AGENTS.md`,
+`sieve.index.json`, `HISTORY.jsonl`, `PROGRESS.md`, and `scripts/bridge.mjs`
+straight from `raw.githubusercontent.com` and renders what's actually there.
+A repo with no `AGENTS.md` gets an honest empty state, never fabricated
+numbers.
+
+## Develop
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000/?repo=owner/name` for any public repo, or use
+the picker on the page.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js (App Router) + TypeScript + Tailwind v4. No database — every request
+re-fetches from GitHub's raw CDN with a 5-minute revalidation window.
