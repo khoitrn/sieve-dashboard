@@ -1,0 +1,9 @@
+# Copy to .dev.vars (already gitignored) for `wrangler pages dev`.
+# Read only by functions/api/auth/callback/*.ts — never sent to the browser.
+# In production, set these with:
+#   npx wrangler pages secret put GITHUB_CLIENT_SECRET --project-name=sieve-dashboard
+#   npx wrangler pages secret put GITLAB_CLIENT_SECRET --project-name=sieve-dashboard
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITLAB_CLIENT_ID=
+GITLAB_CLIENT_SECRET=

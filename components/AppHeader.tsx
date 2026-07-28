@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AuthMenu } from "@/components/AuthMenu";
 import { RepoPicker } from "@/components/RepoPicker";
 
 export function AppHeader({
@@ -39,6 +40,7 @@ export function AppHeader({
         </span>
         {children}
         <RepoPicker current={current} />
+        <AuthMenu />
       </div>
     </header>
   );

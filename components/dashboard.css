@@ -224,6 +224,77 @@
   font-family: -apple-system, sans-serif;
 }
 
+/* ---------- auth ---------- */
+.auth-menu {
+  position: relative;
+}
+.auth-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 11px;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.auth-trigger:hover {
+  border-color: var(--accent);
+}
+.auth-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex: none;
+}
+.auth-avatar-placeholder {
+  background: var(--line-strong);
+}
+.auth-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 260px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 20;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.auth-dropdown-label {
+  margin: 0 2px 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-faint-text);
+}
+.auth-dropdown-item {
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 2px;
+  padding: 8px 8px;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.auth-dropdown-item:hover:not(:disabled) {
+  background: var(--bg);
+}
+.auth-dropdown-item:disabled {
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+.auth-dropdown-item .dim {
+  color: var(--ink-faint-text);
+  font-size: 11px;
+}
+
 /* ---------- stat strip ---------- */
 .stat-strip {
   display: grid;
