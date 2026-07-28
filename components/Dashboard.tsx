@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { HistoryTail } from "@/components/HistoryTail";
 import { SkillUsagePanel } from "@/components/SkillUsagePanel";
 import { StatStrip } from "@/components/StatStrip";
+import { timeAgo } from "@/lib/format";
 import { parseOwnerRepo } from "@/lib/github";
 import { bucketByDay, fetchHistory, getRepoSnapshot } from "@/lib/sieve-repo";
 import type { RepoSnapshot } from "@/lib/types";
@@ -17,15 +18,6 @@ import type { RepoSnapshot } from "@/lib/types";
 const POLL_MS = 90_000;
 const TICK_MS = 15_000;
 const HIGHLIGHT_MS = 4_000;
-
-function timeAgo(date: Date | null) {
-  if (!date) return "not checked yet";
-  const secs = Math.round((Date.now() - date.getTime()) / 1000);
-  if (secs < 10) return "updated just now";
-  if (secs < 60) return `checked ${secs}s ago`;
-  const mins = Math.round(secs / 60);
-  return `checked ${mins}m ago`;
-}
 
 export function Dashboard() {
   const searchParams = useSearchParams();

@@ -174,6 +174,21 @@ export async function fetchHistory(owner: string, repo: string): Promise<History
 }
 
 /**
+ * Polling only needs sieve.index.json, not the full snapshot. Returns null if
+ * the file is missing or unparsable so callers can tell "nothing changed"
+ * apart from "the catalog just disappeared or broke."
+ */
+export async function fetchIndex(owner: string, repo: string): Promise<SieveIndex | null> {
+  const raw = await fetchRaw(owner, repo, "sieve.index.json");
+  if (raw === null) return null;
+  try {
+    return JSON.parse(raw) as SieveIndex;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * A skill's frontmatter (name, triggers, tags, version) is metadata already
  * shown elsewhere. The body is the actual portable instructions an agent
  * reads — that's the part worth proving is real, vendor-neutral prose.
