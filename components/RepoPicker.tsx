@@ -1,15 +1,12 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { fetchRaw, parseOwnerRepo } from "@/lib/github";
 
 const QUICK_PICKS = ["khoitrn/sieve", "khoitrn/khoitrn-web", "khoitrn/japan-journal"];
 const RECENTS_KEY = "sieve-dashboard:recent";
 const MAX_RECENTS = 8;
-
-function go(repo: string) {
-  window.history.pushState(null, "", `/?repo=${encodeURIComponent(repo)}`);
-}
 
 function readRecents(): string[] {
   if (typeof window === "undefined") return [];
@@ -33,6 +30,7 @@ function rememberRepo(repo: string) {
 }
 
 export function RepoPicker({ current }: { current: string }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +79,7 @@ export function RepoPicker({ current }: { current: string }) {
   function select(repo: string) {
     rememberRepo(repo);
     setRecents(readRecents());
-    go(repo);
+    window.history.pushState(null, "", `${pathname}?repo=${encodeURIComponent(repo)}`);
     close();
   }
 

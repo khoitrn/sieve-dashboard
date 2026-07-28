@@ -4,10 +4,10 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import "./dashboard.css";
 import { ActivityTrend } from "@/components/ActivityTrend";
+import { AppHeader } from "@/components/AppHeader";
 import { ArchitecturePanel } from "@/components/ArchitecturePanel";
 import { EmptyState } from "@/components/EmptyState";
 import { HistoryTail } from "@/components/HistoryTail";
-import { RepoPicker } from "@/components/RepoPicker";
 import { SkillUsagePanel } from "@/components/SkillUsagePanel";
 import { StatStrip } from "@/components/StatStrip";
 import { parseOwnerRepo } from "@/lib/github";
@@ -111,32 +111,19 @@ export function Dashboard() {
 
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <h1 className="brand-mark">
-            [<span>&#9642;</span>] SIEVE
-          </h1>
-          <span className="brand-tag">Project visibility</span>
-        </div>
-        <div className="topbar-right">
-          <span className="local-badge">
-            <span className="dot good" />
-            Public GitHub &middot; reads files in your browser, no account
+      <AppHeader active="dashboard" current={`${parsed.owner}/${parsed.repo}`}>
+        {snapshot?.connected && (
+          <span className="live-status mono" role="status">
+            <span className={`dot ${checking ? "info" : "good"}`} aria-hidden="true" />
+            {checking ? "checking…" : timeAgo(lastChecked)}
+            <button type="button" className="refresh-btn" onClick={poll} aria-label="Refresh now">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3.5H10" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </span>
-          {snapshot?.connected && (
-            <span className="live-status mono" role="status">
-              <span className={`dot ${checking ? "info" : "good"}`} aria-hidden="true" />
-              {checking ? "checking…" : timeAgo(lastChecked)}
-              <button type="button" className="refresh-btn" onClick={poll} aria-label="Refresh now">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-                  <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3.5H10" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </span>
-          )}
-          <RepoPicker current={`${parsed.owner}/${parsed.repo}`} />
-        </div>
-      </header>
+        )}
+      </AppHeader>
 
       <main>
         {loading || !snapshot ? (

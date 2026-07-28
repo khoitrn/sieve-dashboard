@@ -9,6 +9,7 @@ export interface SieveSkill {
   last_reviewed: string;
   status: string;
   url?: string;
+  tags?: string[];
 }
 
 export interface SieveIndex {
