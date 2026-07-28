@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { bucketByDay, skillMatches } from "@/lib/sieve-repo";
+import { useEffect, useState } from "react";
+import { bucketByDay, fetchSkillBody, skillMatches } from "@/lib/sieve-repo";
 import type { HistoryEvent, SieveSkill } from "@/lib/types";
 
 const DOMAIN_ORDER = ["planning", "testing", "review", "debugging", "verification", "maintenance"] as const;
@@ -17,9 +17,10 @@ const DOMAIN_VAR: Record<(typeof DOMAIN_ORDER)[number], string> = {
 
 const SPARK_DAYS = 14;
 
+type BodyState = "loading" | string | null;
+
 function formatTime(ts: string) {
-  const d = new Date(ts);
-  return `${d.toLocaleDateString(undefined, { month: "2-digit", day: "2-digit" })} · ${d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+  return `${new Date(ts).toLocaleDateString(undefined, { month: "2-digit", day: "2-digit" })} · ${new Date(ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 function categoryRank(category: string) {
@@ -27,10 +28,58 @@ function categoryRank(category: string) {
   return i === -1 ? DOMAIN_ORDER.length : i;
 }
 
+function SkillBody({ owner, repo, skill }: { owner: string; repo: string; skill: SieveSkill }) {
+  const [body, setBody] = useState<BodyState>("loading");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchSkillBody(owner, repo, skill).then((result) => {
+      if (!cancelled) setBody(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [owner, repo, skill]);
+
+  return (
+    <div className="skill-body-block">
+      <div className="skill-body-head">
+        <span className="skill-body-title">Instructions{skill.url ? <span className="dim"> — {skill.url}</span> : null}</span>
+        {typeof body === "string" && body && (
+          <button
+            type="button"
+            className="skill-body-copy"
+            onClick={() => {
+              navigator.clipboard?.writeText(body).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1400);
+              });
+            }}
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        )}
+      </div>
+      {body === "loading" ? (
+        <p className="skill-detail-empty">Loading the real file from GitHub&hellip;</p>
+      ) : body === null ? (
+        <p className="skill-detail-empty">Couldn&rsquo;t fetch this skill&rsquo;s file from GitHub.</p>
+      ) : (
+        <pre className="skill-body mono">{body}</pre>
+      )}
+    </div>
+  );
+}
+
 export function SkillUsagePanel({
+  owner,
+  repo,
   skills,
   history,
 }: {
+  owner: string;
+  repo: string;
   skills: SieveSkill[];
   history: HistoryEvent[];
 }) {
@@ -50,7 +99,8 @@ export function SkillUsagePanel({
       <h2 className="panel-eyebrow">
         Skill usage{" "}
         <span className="count">
-          &mdash; real mentions in HISTORY.jsonl, {SPARK_DAYS}-day trend, click a skill for the evidence
+          &mdash; real mentions in HISTORY.jsonl, {SPARK_DAYS}-day trend, click a skill for the actual instructions
+          and evidence
         </span>
       </h2>
       <div className="cat-legend">
@@ -133,6 +183,9 @@ export function SkillUsagePanel({
 
               {isOpen && (
                 <div id={detailId} className="skill-detail">
+                  <SkillBody owner={owner} repo={repo} skill={skill} />
+
+                  <span className="skill-body-title skill-detail-evidence-title">Evidence in HISTORY.jsonl</span>
                   {matches.length === 0 ? (
                     <p className="skill-detail-empty">No HISTORY.jsonl event mentions this skill yet.</p>
                   ) : (

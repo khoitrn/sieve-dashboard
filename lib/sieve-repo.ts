@@ -173,6 +173,29 @@ export async function fetchHistory(owner: string, repo: string): Promise<History
   return parseHistory(raw);
 }
 
+/**
+ * A skill's frontmatter (name, triggers, tags, version) is metadata already
+ * shown elsewhere. The body is the actual portable instructions an agent
+ * reads — that's the part worth proving is real, vendor-neutral prose.
+ */
+function stripFrontmatter(source: string): string {
+  if (!source.startsWith("---")) return source.trim();
+  const end = source.indexOf("\n---", 3);
+  if (end === -1) return source.trim();
+  return source.slice(end + 4).trim();
+}
+
+/**
+ * Fetched lazily, only when a visitor actually expands a skill row — not
+ * eagerly for the whole catalog on page load.
+ */
+export async function fetchSkillBody(owner: string, repo: string, skill: SieveSkill): Promise<string | null> {
+  if (!skill.url) return null;
+  const raw = await fetchRaw(owner, repo, skill.url);
+  if (raw === null) return null;
+  return stripFrontmatter(raw);
+}
+
 /** One count per day for the trailing `days` days, oldest first, today last. */
 export function bucketByDay(history: HistoryEvent[], days: number): { date: string; count: number }[] {
   const buckets = new Map<string, number>();

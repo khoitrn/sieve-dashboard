@@ -157,7 +157,12 @@ export function Dashboard() {
             <ActivityTrend buckets={trend} />
 
             <div className="grid-main">
-              <SkillUsagePanel skills={snapshot.index?.skills ?? []} history={snapshot.history} />
+              <SkillUsagePanel
+                owner={snapshot.owner}
+                repo={snapshot.repo}
+                skills={snapshot.index?.skills ?? []}
+                history={snapshot.history}
+              />
               <ArchitecturePanel
                 owner={snapshot.owner}
                 repo={snapshot.repo}
