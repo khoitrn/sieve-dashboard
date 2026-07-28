@@ -24,23 +24,22 @@ export function AppHeader({
         <span className="brand-tag">Project visibility</span>
       </div>
 
-      <nav className="main-nav" aria-label="Sections">
-        <Link href={`/${repoQuery}`} className={`nav-link${active === "dashboard" ? " active" : ""}`}>
-          Dashboard
-        </Link>
-        <Link href={`/library${repoQuery}`} className={`nav-link${active === "library" ? " active" : ""}`}>
-          Library
-        </Link>
-      </nav>
-
       <div className="topbar-right">
+        <nav className="main-nav" aria-label="Sections">
+          <Link href={`/${repoQuery}`} className={`nav-link${active === "dashboard" ? " active" : ""}`}>
+            Dashboard
+          </Link>
+          <Link href={`/library${repoQuery}`} className={`nav-link${active === "library" ? " active" : ""}`}>
+            Library
+          </Link>
+        </nav>
+        <AuthMenu />
+        <RepoPicker current={current} />
         <span className="local-badge">
           <span className="dot good" />
           Public GitHub &middot; reads files in your browser, no account
         </span>
         {children}
-        <RepoPicker current={current} />
-        <AuthMenu />
       </div>
     </header>
   );
