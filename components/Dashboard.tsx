@@ -158,7 +158,13 @@ export function Dashboard() {
 
             <div className="grid-main">
               <SkillUsagePanel skills={snapshot.index?.skills ?? []} history={snapshot.history} />
-              <ArchitecturePanel owner={snapshot.owner} repo={snapshot.repo} bridges={snapshot.bridges} />
+              <ArchitecturePanel
+                owner={snapshot.owner}
+                repo={snapshot.repo}
+                bridges={snapshot.bridges}
+                files={snapshot.files}
+                skills={snapshot.index?.skills ?? []}
+              />
             </div>
 
             <HistoryTail history={snapshot.history} newCount={newCount} />

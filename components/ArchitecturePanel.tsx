@@ -1,63 +1,69 @@
-import type { Bridge } from "@/lib/types";
+import { categoryBreakdown } from "@/lib/sieve-repo";
+import type { Bridge, FileStatus, SieveSkill } from "@/lib/types";
 
-export function ArchitecturePanel({ owner, repo, bridges }: { owner: string; repo: string; bridges: Bridge[] }) {
+export function ArchitecturePanel({
+  owner,
+  repo,
+  bridges,
+  files,
+  skills,
+}: {
+  owner: string;
+  repo: string;
+  bridges: Bridge[];
+  files: FileStatus[];
+  skills: SieveSkill[];
+}) {
+  const categories = categoryBreakdown(skills);
+  const presentCount = files.filter((f) => f.present).length;
+
   return (
     <section className="panel">
-      <h2 className="panel-eyebrow">Architecture</h2>
-      <div className="diagram">
-        <div className="node accent">
-          GitHub
-          <span className="sub">
-            {owner}/{repo}
-          </span>
-        </div>
-        <div className="connector" />
-        <div className="node">
-          AGENTS.md
-          <span className="sub">protocol &middot; source of truth</span>
-        </div>
-        <div className="branch-bar">
-          <svg viewBox="0 0 480 16" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M240 0 V8 M120 8 H360 M120 8 V16 M360 8 V16" />
-          </svg>
-        </div>
-        <div className="branch-row">
-          <div className="branch-col">
-            <div className="node" style={{ fontSize: 11.5 }}>
-              Guardrails
-              <span className="sub">always active</span>
-            </div>
-          </div>
-          <div className="branch-col">
-            <div className="node" style={{ fontSize: 11.5 }}>
-              Skill catalog
-              <span className="sub">shortlisted per task</span>
-            </div>
-          </div>
-        </div>
-        <div className="branch-bar">
-          <svg viewBox="0 0 480 16" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M120 0 V8 M360 0 V8 M120 8 H360 M240 8 V16" />
-          </svg>
-        </div>
-        <div className="loop-wrap">
-          <div className="node accent">
-            Agent session
-            <span className="sub">this run</span>
-          </div>
-          <div className="connector" />
-          <div className="node">
-            PROGRESS.md + HISTORY.jsonl
-            <span className="sub">continuity, read next session</span>
-          </div>
-          <div className="loop-svg" aria-hidden="true">
-            <svg viewBox="0 0 34 148" preserveAspectRatio="none">
-              <path d="M2 4 H20 a8 8 0 0 1 8 8 V136 a8 8 0 0 1 -8 8 H2" />
-            </svg>
-          </div>
-          <div className="loop-label">loops back to&nbsp;AGENTS.md next session</div>
-        </div>
-      </div>
+      <h2 className="panel-eyebrow">
+        Architecture{" "}
+        <span className="count">
+          &mdash; {presentCount}/{files.length} protocol files present in {owner}/{repo}
+        </span>
+      </h2>
+
+      <ul className="file-map">
+        {files.map((f) => (
+          <li key={f.key} className={f.present ? "present" : "missing"}>
+            <span className={`dot ${f.present ? "good" : "dim"}`} aria-hidden="true" />
+            <span className="file-map-path mono">{f.path}</span>
+            <span className="file-map-label">{f.label}</span>
+            <span className="file-map-status">{f.present ? "present" : "missing"}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h3 className="panel-subhead">
+        Catalog shape <span className="count">&mdash; {skills.length} skills by category</span>
+      </h3>
+      {categories.length === 0 ? (
+        <p className="skill-detail-empty">No sieve.index.json skills to break down.</p>
+      ) : (
+        <ul className="category-rows">
+          {categories.map((c) => (
+            <li key={c.category} className={`category-row cat-${c.category}`}>
+              <span className="category-name">{c.category}</span>
+              <div className="category-bar">
+                <span
+                  className="category-bar-catalog"
+                  style={{ width: `${(c.catalog / c.total) * 100}%` }}
+                />
+                <span
+                  className="category-bar-guardrail"
+                  style={{ width: `${(c.guardrail / c.total) * 100}%` }}
+                />
+              </div>
+              <span className="category-count mono">
+                {c.catalog} catalog{c.guardrail > 0 ? ` · ${c.guardrail} guardrail` : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="agent-badges">
         <span className="agent-badges-title">Agent bridges</span>

@@ -1,5 +1,16 @@
 import { fetchRaw } from "./github";
-import type { Bridge, HistoryEvent, RepoSnapshot, SieveIndex, SieveSkill } from "./types";
+import type { Bridge, FileStatus, HistoryEvent, RepoSnapshot, SieveIndex, SieveSkill } from "./types";
+
+const PROTOCOL_FILES: { key: string; path: string; label: string }[] = [
+  { key: "agentsMd", path: "AGENTS.md", label: "Protocol, single source of truth" },
+  { key: "index", path: "sieve.index.json", label: "Skill catalog manifest" },
+  { key: "progressMd", path: "PROGRESS.md", label: "Continuity: phase, decisions" },
+  { key: "historyJsonl", path: "HISTORY.jsonl", label: "Append-only event log" },
+  { key: "proposedMd", path: "PROPOSED.md", label: "Growth loop: gaps found in use" },
+  { key: "staleMd", path: "STALE.md", label: "Growth loop: skills flagged wrong" },
+  { key: "staging", path: "staging/README.md", label: "Contribution lane before promotion" },
+  { key: "bridgeScript", path: "scripts/bridge.mjs", label: "Writes per-agent pointer files" },
+];
 
 interface BridgeDef {
   agent: string;
@@ -63,17 +74,31 @@ export async function getRepoSnapshot(owner: string, repo: string): Promise<Repo
       progressSummary: null,
       staleCount: 0,
       proposedCount: 0,
+      files: PROTOCOL_FILES.map((f) => ({ ...f, present: false })),
     };
   }
 
-  const [indexRaw, historyRaw, progressRaw, bridgeScript, staleRaw, proposedRaw] = await Promise.all([
+  const [indexRaw, historyRaw, progressRaw, bridgeScript, staleRaw, proposedRaw, stagingRaw] = await Promise.all([
     fetchRaw(owner, repo, "sieve.index.json"),
     fetchRaw(owner, repo, "HISTORY.jsonl"),
     fetchRaw(owner, repo, "PROGRESS.md"),
     fetchRaw(owner, repo, "scripts/bridge.mjs"),
     fetchRaw(owner, repo, "STALE.md"),
     fetchRaw(owner, repo, "PROPOSED.md"),
+    fetchRaw(owner, repo, "staging/README.md"),
   ]);
+
+  const rawByKey: Record<string, string | null> = {
+    agentsMd,
+    index: indexRaw,
+    historyJsonl: historyRaw,
+    progressMd: progressRaw,
+    bridgeScript,
+    staleMd: staleRaw,
+    proposedMd: proposedRaw,
+    staging: stagingRaw,
+  };
+  const files: FileStatus[] = PROTOCOL_FILES.map((f) => ({ ...f, present: rawByKey[f.key] !== null }));
 
   let index: SieveIndex | null = null;
   if (indexRaw) {
@@ -102,21 +127,39 @@ export async function getRepoSnapshot(owner: string, repo: string): Promise<Repo
     progressSummary: progressRaw ? extractCurrentPhase(progressRaw) : null,
     staleCount: countEntries(staleRaw),
     proposedCount: countEntries(proposedRaw),
+    files,
   };
 }
 
 /**
  * No per-skill usage telemetry exists in HISTORY.jsonl today — sieve only logs
- * catalog/protocol events, not "skill N fired in session M". Mention count in
- * the real log is the closest honest signal; it is not a usage count and is
- * labeled as such wherever it's shown.
+ * catalog/protocol events, not "skill N fired in session M". A real mention in
+ * the log is the closest honest signal; it is not a usage count. Returned
+ * oldest first so callers can bucket a trend or just take the last one.
  */
-export function skillSignal(skill: SieveSkill, history: HistoryEvent[]) {
-  const matches = history.filter((e) => JSON.stringify(e).includes(skill.name));
-  const lastMention = matches.length
-    ? matches.map((e) => e.ts).sort().at(-1) ?? null
-    : null;
-  return { mentionCount: matches.length, lastMention };
+export function skillMatches(skill: SieveSkill, history: HistoryEvent[]): HistoryEvent[] {
+  return history
+    .filter((e) => JSON.stringify(e).includes(skill.name))
+    .sort((a, b) => a.ts.localeCompare(b.ts));
+}
+
+/** Roll skills up by category: total count and the catalog/guardrail split. */
+export function categoryBreakdown(
+  skills: SieveSkill[]
+): { category: string; total: number; catalog: number; guardrail: number }[] {
+  const byCategory = new Map<string, { catalog: number; guardrail: number }>();
+  for (const s of skills) {
+    const entry = byCategory.get(s.category) ?? { catalog: 0, guardrail: 0 };
+    if (s.tier === "guardrail") entry.guardrail++;
+    else entry.catalog++;
+    byCategory.set(s.category, entry);
+  }
+  return Array.from(byCategory, ([category, { catalog, guardrail }]) => ({
+    category,
+    total: catalog + guardrail,
+    catalog,
+    guardrail,
+  })).sort((a, b) => b.total - a.total);
 }
 
 /**

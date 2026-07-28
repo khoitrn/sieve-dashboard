@@ -29,6 +29,13 @@ export interface Bridge {
   active: boolean;
 }
 
+export interface FileStatus {
+  key: string;
+  path: string;
+  label: string;
+  present: boolean;
+}
+
 export interface RepoSnapshot {
   owner: string;
   repo: string;
@@ -39,4 +46,5 @@ export interface RepoSnapshot {
   progressSummary: string | null;
   staleCount: number;
   proposedCount: number;
+  files: FileStatus[];
 }
