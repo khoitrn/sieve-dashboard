@@ -8,7 +8,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { SkillBody } from "@/components/SkillBody";
 import { parseOwnerRepo } from "@/lib/github";
 import { getRepoSnapshot } from "@/lib/sieve-repo";
-import type { RepoSnapshot } from "@/lib/types";
+import type { RepoSnapshot, SkillTier } from "@/lib/types";
+
+const TIERS: SkillTier[] = ["catalog", "guardrail"];
 
 const DOMAIN_ORDER = ["planning", "testing", "review", "debugging", "verification", "maintenance"] as const;
 
@@ -25,6 +27,7 @@ export function LibraryView() {
   const [snapshot, setSnapshot] = useState<RepoSnapshot | null>(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [tier, setTier] = useState<SkillTier | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const loading = !snapshot || snapshot.owner !== parsed.owner || snapshot.repo !== parsed.repo;
 
@@ -47,6 +50,7 @@ export function LibraryView() {
 
   const filtered = skills
     .filter((s) => (category ? s.category === category : true))
+    .filter((s) => (tier ? s.tier === tier : true))
     .filter((s) => {
       const q = query.trim().toLowerCase();
       if (!q) return true;
@@ -87,6 +91,25 @@ export function LibraryView() {
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search the skill library"
               />
+              <div className="lib-tier-toggle" role="group" aria-label="Filter by tier">
+                <button
+                  type="button"
+                  className={`lib-tier-btn${tier === null ? " active" : ""}`}
+                  onClick={() => setTier(null)}
+                >
+                  all
+                </button>
+                {TIERS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`lib-tier-btn${tier === t ? " active" : ""}`}
+                    onClick={() => setTier(tier === t ? null : t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
               <div className="lib-filters">
                 <button
                   type="button"

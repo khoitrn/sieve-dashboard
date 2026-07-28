@@ -482,6 +482,35 @@
   font-size: 12.5px;
   color: var(--ink);
 }
+.lib-tier-toggle {
+  display: flex;
+  gap: 2px;
+  flex: none;
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  padding: 3px;
+}
+.lib-tier-btn {
+  background: none;
+  border: none;
+  border-radius: 16px;
+  padding: 5px 11px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 11px;
+  text-transform: capitalize;
+  color: var(--ink-faint-text);
+  cursor: pointer;
+}
+.lib-tier-btn:hover {
+  color: var(--ink);
+}
+.lib-tier-btn.active {
+  background: var(--accent-ink);
+  color: var(--surface-raised);
+  font-weight: 600;
+}
+
 .lib-filters {
   display: flex;
   flex-wrap: wrap;
