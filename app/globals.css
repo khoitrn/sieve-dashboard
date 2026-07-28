@@ -7,7 +7,8 @@
   --surface-raised: #fafaf4;
   --ink: #1e2119;
   --ink-dim: #5b6058;
-  --ink-faint: #8a9086;
+  --ink-faint: #7f857a;
+  --ink-faint-text: #63685f;
   --accent: #bd7a2c;
   --accent-ink: #6b4413;
   --line: rgba(30, 33, 25, 0.13);
@@ -32,6 +33,7 @@
     --ink: #edebdf;
     --ink-dim: #a2a497;
     --ink-faint: #6c6f62;
+    --ink-faint-text: #7d8172;
     --accent: #e3a24f;
     --accent-ink: #f5d9ac;
     --line: rgba(237, 235, 223, 0.13);
@@ -55,6 +57,7 @@
   --ink: #edebdf;
   --ink-dim: #a2a497;
   --ink-faint: #6c6f62;
+  --ink-faint-text: #7d8172;
   --accent: #e3a24f;
   --accent-ink: #f5d9ac;
   --line: rgba(237, 235, 223, 0.13);
@@ -76,7 +79,8 @@
   --surface-raised: #fafaf4;
   --ink: #1e2119;
   --ink-dim: #5b6058;
-  --ink-faint: #8a9086;
+  --ink-faint: #7f857a;
+  --ink-faint-text: #63685f;
   --accent: #bd7a2c;
   --accent-ink: #6b4413;
   --line: rgba(30, 33, 25, 0.13);
@@ -118,6 +122,18 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-ink);
   outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

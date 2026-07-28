@@ -118,3 +118,30 @@ export function skillSignal(skill: SieveSkill, history: HistoryEvent[]) {
     : null;
   return { mentionCount: matches.length, lastMention };
 }
+
+/**
+ * Polling only needs HISTORY.jsonl, not the full snapshot (index, bridges,
+ * PROGRESS.md, etc). Returns null if the repo has gone away between polls;
+ * callers should treat that as "no change" rather than a hard failure.
+ */
+export async function fetchHistory(owner: string, repo: string): Promise<HistoryEvent[] | null> {
+  const raw = await fetchRaw(owner, repo, "HISTORY.jsonl");
+  if (raw === null) return null;
+  return parseHistory(raw);
+}
+
+/** One count per day for the trailing `days` days, oldest first, today last. */
+export function bucketByDay(history: HistoryEvent[], days: number): { date: string; count: number }[] {
+  const buckets = new Map<string, number>();
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    buckets.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const e of history) {
+    const day = e.ts?.slice(0, 10);
+    if (day && buckets.has(day)) buckets.set(day, (buckets.get(day) ?? 0) + 1);
+  }
+  return Array.from(buckets, ([date, count]) => ({ date, count }));
+}

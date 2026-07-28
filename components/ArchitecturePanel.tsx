@@ -17,7 +17,7 @@ export function ArchitecturePanel({ owner, repo, bridges }: { owner: string; rep
           <span className="sub">protocol &middot; source of truth</span>
         </div>
         <div className="branch-bar">
-          <svg viewBox="0 0 480 16" preserveAspectRatio="none">
+          <svg viewBox="0 0 480 16" preserveAspectRatio="none" aria-hidden="true">
             <path d="M240 0 V8 M120 8 H360 M120 8 V16 M360 8 V16" />
           </svg>
         </div>
@@ -36,7 +36,7 @@ export function ArchitecturePanel({ owner, repo, bridges }: { owner: string; rep
           </div>
         </div>
         <div className="branch-bar">
-          <svg viewBox="0 0 480 16" preserveAspectRatio="none">
+          <svg viewBox="0 0 480 16" preserveAspectRatio="none" aria-hidden="true">
             <path d="M120 0 V8 M360 0 V8 M120 8 H360 M240 8 V16" />
           </svg>
         </div>
@@ -63,8 +63,9 @@ export function ArchitecturePanel({ owner, repo, bridges }: { owner: string; rep
         <span className="agent-badges-title">Agent bridges</span>
         {bridges.map((b) => (
           <span key={b.agent} className={`badge${b.active ? " on" : ""}`} title={b.file}>
-            <span className={`dot ${b.active ? "good" : "dim"}`} />
+            <span className={`dot ${b.active ? "good" : "dim"}`} aria-hidden="true" />
             {b.agent}
+            <span className="sr-only">{b.active ? ", active" : ", not active"}</span>
           </span>
         ))}
         {bridges.length === 0 && <span className="badge">no bridge.mjs found</span>}

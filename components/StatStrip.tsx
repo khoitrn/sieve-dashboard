@@ -34,7 +34,7 @@ export function StatStrip({
       <div className="stat">
         <span className="stat-label">Catalog health</span>
         <span className="stat-value">
-          <span className={`dot ${healthy ? "good" : "dim"}`} />
+          <span className={`dot ${healthy ? "good" : "dim"}`} aria-hidden="true" />
           {healthy ? "Healthy" : "Needs triage"}
         </span>
         <span className="stat-sub">
@@ -44,7 +44,10 @@ export function StatStrip({
       <div className="stat">
         <span className="stat-label">Guardrails intact</span>
         <span className="stat-value mono">
-          <span className={`dot ${activeGuardrails.length === guardrails.length ? "good" : "dim"}`} />
+          <span
+            className={`dot ${activeGuardrails.length === guardrails.length ? "good" : "dim"}`}
+            aria-hidden="true"
+          />
           {activeGuardrails.length} / {guardrails.length}
         </span>
         <span className="stat-sub">{guardrails.map((g) => g.name).join(" · ")}</span>
