@@ -19,7 +19,17 @@ export function AppHeader({
     <header className="topbar">
       <div className="brand">
         <h1 className="brand-mark">
-          [<span>&#9642;</span>] SIEVE
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="1.5" y="1.5" width="21" height="21" rx="5" fill="var(--accent)" />
+            <path
+              d="M15.8 8.0 C15.6 6.2 10.8 6.8 12 12 C13.2 17.2 8.4 17.8 8.2 16.0"
+              fill="none"
+              stroke="var(--surface-raised)"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+            />
+          </svg>
+          SIEVE
         </h1>
         <span className="brand-tag">Project visibility</span>
       </div>
