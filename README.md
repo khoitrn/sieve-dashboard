@@ -1,35 +1,54 @@
 # Sieve dashboard
 
-A read-only website that shows whether a public GitHub repo is running the
-[Sieve](https://github.com/khoitrn/sieve) protocol — its skill catalog, which
-skills are guardrails vs. catalog, real mentions of each skill in the repo's
-own `HISTORY.jsonl`, and the protocol's file-based architecture.
+The hosted companion to [Sieve](https://github.com/khoitrn/sieve) — a
+read-only website with four views: browse the skill pool you'd actually
+pull into a project, connect your own skill repos, author skills by hand,
+and inspect whether a specific public repo is running the protocol.
 
-Separate repo from `sievekit` on purpose: this is a hosted viewer of repos,
-not a feature of the npm package. Every load reads `AGENTS.md`,
-`sieve.index.json`, `HISTORY.jsonl`, `PROGRESS.md`, and `scripts/bridge.mjs`
-straight from `raw.githubusercontent.com` and renders what's actually there.
-A repo with no `AGENTS.md` gets an honest empty state, never fabricated
-numbers. Anyone can type their own `owner/repo` into the picker; repos
-you've viewed are remembered in your browser's `localStorage` only, nothing
-is sent anywhere.
+Separate repo from `sievekit` on purpose: this is a hosted viewer and
+authoring surface, not a feature of the npm package. No account, no
+database on this side — identity and skill data live in
+[`sieve-registry`](https://github.com/khoitrn/sieve-registry); this app is
+the UI on top of it.
 
-Signing in (GitHub or GitLab, your choice) is optional. There's still no
-account and no database: the OAuth token lives in your browser's
-`localStorage` only, never on a server — the one server-side step is a
-Cloudflare Pages Function that exchanges the OAuth code for a token without
-exposing the client secret, then hands the token back in a URL fragment and
-forgets it. **Scope right now:** the sign-in flow itself is fully wired for
-both providers; using the resulting token to read private repos or raise
-API rate limits isn't plugged into the fetch layer yet — today's fetches
-still go through the unauthenticated `raw.githubusercontent.com` path
-regardless of whether you're signed in. See "Sign-in setup" below to get a
-session working, and treat private-repo/rate-limit wiring as the next step.
+## The four tabs
 
-While a repo is open, `HISTORY.jsonl` is rechecked every 90 seconds (paused
-while the tab is hidden) so new events show up without a reload, and the
-activity panel buckets the existing history into a 30-day trend instead of
-just a single last-event stat.
+- **Library** — your actual skill pool: the curated catalog plus any
+  sources you've connected plus skills you've authored yourself, pulled
+  live from the registry. Each row is labeled `from <source>` so you can
+  tell curated, connected, and custom skills apart at a glance. Anonymous
+  visitors see the curated pool only — sign in to blend in your own.
+- **Sources** — connect an external repo (`owner/repo`) as a skill source.
+  Sign-in required. The registry walks it (every `SKILL.md` in the tree)
+  and folds it into your Library and onboarding recommendations; it's
+  never visible to, or blended into, anyone else's.
+- **Custom** — author skills directly in the browser: name, description,
+  category, tags, instructions. Sign-in required. These are scoped to your
+  GitHub identity (`custom:<login>`), not to any repo — no source to
+  connect, nothing for the sync loop to pull, you *are* the source of
+  truth. Delete removes one cleanly.
+- **Dashboard** — the original per-repo inspector: point it at any public
+  `owner/repo` and it reads `AGENTS.md`, `sieve.index.json`,
+  `HISTORY.jsonl`, `PROGRESS.md`, and `scripts/bridge.mjs` straight from
+  `raw.githubusercontent.com` and renders what's actually there — skill
+  catalog, guardrail vs. catalog split, real mentions in the repo's own
+  history, a 30-day activity trend (`HISTORY.jsonl` rechecked every 90s
+  while the tab is open, paused when hidden). A repo with no `AGENTS.md`
+  gets an honest empty state, never fabricated numbers. Repos you've
+  viewed are remembered in your browser's `localStorage` only.
+
+Library, Sources, and Custom talk to the registry's API. Dashboard talks
+directly to GitHub's raw CDN and never touches the registry.
+
+## Sign-in
+
+GitHub or GitLab, your choice, and optional for Dashboard — required for
+Sources and Custom, and for Library to show anything beyond the curated
+pool. No account and no database on this side: the OAuth token lives in
+your browser's `localStorage` only, never on a server. The one
+server-side step is a Cloudflare Pages Function that exchanges the OAuth
+code for a token without exposing the client secret, then hands the token
+back in a URL fragment and forgets it.
 
 ## Develop
 
@@ -37,9 +56,10 @@ just a single last-event stat.
 npm run dev
 ```
 
-Visit `http://localhost:3000/?repo=owner/name` for any public repo, or use
-the picker on the page — it now accepts a typed `owner/repo` or a full
-`github.com/...` URL, not just the quick-pick list.
+Visit `http://localhost:3000/?repo=owner/name` for the Dashboard view on
+any public repo, or use the picker on the page — it accepts a typed
+`owner/repo` or a full `github.com/...` URL. `/library`, `/sources`, and
+`/custom` need no query param.
 
 ## Sign-in setup
 
@@ -70,7 +90,7 @@ the token exchange, only Cloudflare's dev server does.
 
 3. **Run it:**
    ```bash
-   npm run build        # static export to ./out (also runs `wrangler types`)
+   npm run build         # static export to ./out (also runs `wrangler types`)
    npm run pages:dev     # wrangler pages dev ./out, on http://localhost:8788
    ```
    Plain `npm run dev` still works for everything except sign-in itself —
@@ -91,9 +111,10 @@ the token exchange, only Cloudflare's dev server does.
 ## Stack
 
 Next.js (App Router, static export) + TypeScript + Tailwind v4, deployed on
-Cloudflare Pages. No database, no server-held sessions — every request
-re-fetches from GitHub's raw CDN with a 5-minute revalidation window. The
-one exception is two small Cloudflare Pages Functions
+Cloudflare Pages. No database, no server-held sessions on this side — all
+Library/Sources/Custom state lives in `sieve-registry`; Dashboard re-fetches
+straight from GitHub's raw CDN with a 5-minute revalidation window. The one
+exception is two small Cloudflare Pages Functions
 (`functions/api/auth/callback/{github,gitlab}.ts`) that exist solely to
 exchange an OAuth code for a token without exposing the client secret to
 the browser; they hold no state and see nothing else.
