@@ -1,5 +1,9 @@
 # Sieve dashboard
 
+![status](https://img.shields.io/badge/status-alpha-orange)
+![stack](https://img.shields.io/badge/stack-Next.js%20%2B%20Cloudflare%20Pages-blue)
+![data](https://img.shields.io/badge/database-none-lightgrey)
+
 The hosted companion to [Sieve](https://github.com/khoitrn/sieve) — a
 read-only website with four views: browse the skill pool you'd actually
 pull into a project, connect your own skill repos, author skills by hand,
@@ -13,29 +17,12 @@ the UI on top of it.
 
 ## The four tabs
 
-- **Library** — your actual skill pool: the curated catalog plus any
-  sources you've connected plus skills you've authored yourself, pulled
-  live from the registry. Each row is labeled `from <source>` so you can
-  tell curated, connected, and custom skills apart at a glance. Anonymous
-  visitors see the curated pool only — sign in to blend in your own.
-- **Sources** — connect an external repo (`owner/repo`) as a skill source.
-  Sign-in required. The registry walks it (every `SKILL.md` in the tree)
-  and folds it into your Library and onboarding recommendations; it's
-  never visible to, or blended into, anyone else's.
-- **Custom** — author skills directly in the browser: name, description,
-  category, tags, instructions. Sign-in required. These are scoped to your
-  GitHub identity (`custom:<login>`), not to any repo — no source to
-  connect, nothing for the sync loop to pull, you *are* the source of
-  truth. Delete removes one cleanly.
-- **Dashboard** — the original per-repo inspector: point it at any public
-  `owner/repo` and it reads `AGENTS.md`, `sieve.index.json`,
-  `HISTORY.jsonl`, `PROGRESS.md`, and `scripts/bridge.mjs` straight from
-  `raw.githubusercontent.com` and renders what's actually there — skill
-  catalog, guardrail vs. catalog split, real mentions in the repo's own
-  history, a 30-day activity trend (`HISTORY.jsonl` rechecked every 90s
-  while the tab is open, paused when hidden). A repo with no `AGENTS.md`
-  gets an honest empty state, never fabricated numbers. Repos you've
-  viewed are remembered in your browser's `localStorage` only.
+| Tab | Sign-in | What it does |
+| --- | --- | --- |
+| **Library** | optional | Your actual skill pool: curated catalog + connected sources + your own custom skills, live from the registry. Each row reads `from <source>` so curated/connected/custom are easy to tell apart. Signed out, you see the curated pool only. |
+| **Sources** | required | Connect an external repo (`owner/repo`) as a skill source. The registry walks every `SKILL.md` in its tree and folds it into your Library and onboarding recommendations — never anyone else's. |
+| **Custom** | required | Author skills in the browser: name, description, category, tags, instructions. Scoped to your GitHub identity (`custom:<login>`), not a repo — no source to connect, nothing for the sync loop to pull. You *are* the source of truth. |
+| **Dashboard** | optional | The original per-repo inspector. Point it at any public `owner/repo` and it reads `AGENTS.md`, `sieve.index.json`, `HISTORY.jsonl`, `PROGRESS.md`, and `scripts/bridge.mjs` straight from `raw.githubusercontent.com` — skill catalog, guardrail vs. catalog split, real history mentions, a 30-day activity trend. No `AGENTS.md` gets an honest empty state, never fabricated numbers. |
 
 Library, Sources, and Custom talk to the registry's API. Dashboard talks
 directly to GitHub's raw CDN and never touches the registry.
