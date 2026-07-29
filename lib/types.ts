@@ -38,6 +38,16 @@ export interface FileStatus {
   present: boolean;
 }
 
+export interface RegistrySource {
+  id: string;
+  repo_url: string;
+  kind: "curated" | "user";
+  added_by: string | null;
+  status: string;
+  last_synced_at: string | null;
+  created_at: string;
+}
+
 export interface RepoSnapshot {
   owner: string;
   repo: string;

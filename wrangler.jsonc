@@ -7,7 +7,7 @@
   // Public — client_id is not a secret, it identifies the OAuth App.
   // Client secrets are NOT here: see .dev.vars.example / README for those.
   "vars": {
-    "GITHUB_CLIENT_ID": "",
+    "GITHUB_CLIENT_ID": "Ov23li01cHkB0K02xTZC",
     "GITLAB_CLIENT_ID": ""
   }
 }

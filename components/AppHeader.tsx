@@ -9,7 +9,7 @@ export function AppHeader({
   current,
   children,
 }: {
-  active: "dashboard" | "library";
+  active: "dashboard" | "library" | "sources";
   current: string;
   children?: React.ReactNode;
 }) {
@@ -31,6 +31,9 @@ export function AppHeader({
           </Link>
           <Link href={`/library${repoQuery}`} className={`nav-link${active === "library" ? " active" : ""}`}>
             Library
+          </Link>
+          <Link href="/sources" className={`nav-link${active === "sources" ? " active" : ""}`}>
+            Sources
           </Link>
         </nav>
         <AuthMenu />

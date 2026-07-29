@@ -9,7 +9,7 @@ export interface AuthUser {
   avatarUrl: string | null;
 }
 
-interface AuthSession {
+export interface AuthSession {
   provider: AuthProvider;
   token: string;
 }
