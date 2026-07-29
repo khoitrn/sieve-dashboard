@@ -193,7 +193,7 @@ export async function fetchIndex(owner: string, repo: string): Promise<SieveInde
  * shown elsewhere. The body is the actual portable instructions an agent
  * reads — that's the part worth proving is real, vendor-neutral prose.
  */
-function stripFrontmatter(source: string): string {
+export function stripFrontmatter(source: string): string {
   if (!source.startsWith("---")) return source.trim();
   const end = source.indexOf("\n---", 3);
   if (end === -1) return source.trim();

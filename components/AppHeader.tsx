@@ -9,11 +9,11 @@ export function AppHeader({
   current,
   children,
 }: {
-  active: "dashboard" | "library" | "sources";
-  current: string;
+  active: "dashboard" | "library" | "sources" | "custom";
+  current?: string;
   children?: React.ReactNode;
 }) {
-  const repoQuery = `?repo=${encodeURIComponent(current)}`;
+  const repoQuery = current ? `?repo=${encodeURIComponent(current)}` : "";
 
   return (
     <header className="topbar">
@@ -29,19 +29,26 @@ export function AppHeader({
           <Link href={`/${repoQuery}`} className={`nav-link${active === "dashboard" ? " active" : ""}`}>
             Dashboard
           </Link>
-          <Link href={`/library${repoQuery}`} className={`nav-link${active === "library" ? " active" : ""}`}>
+          <Link href="/library" className={`nav-link${active === "library" ? " active" : ""}`}>
             Library
           </Link>
           <Link href="/sources" className={`nav-link${active === "sources" ? " active" : ""}`}>
             Sources
           </Link>
+          <Link href="/custom" className={`nav-link${active === "custom" ? " active" : ""}`}>
+            Custom
+          </Link>
         </nav>
         <AuthMenu />
-        <RepoPicker current={current} />
-        <span className="local-badge">
-          <span className="dot good" />
-          Public GitHub &middot; reads files in your browser, no account
-        </span>
+        {active === "dashboard" && current && (
+          <>
+            <RepoPicker current={current} />
+            <span className="local-badge">
+              <span className="dot good" />
+              Public GitHub &middot; reads files in your browser, no account
+            </span>
+          </>
+        )}
         {children}
       </div>
     </header>

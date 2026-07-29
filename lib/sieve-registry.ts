@@ -1,7 +1,7 @@
 "use client";
 
 import type { AuthSession } from "@/lib/auth";
-import type { RegistrySource } from "@/lib/types";
+import type { RegistrySkill, RegistrySource } from "@/lib/types";
 
 // Overridable so self-hosting a registry stays possible — same pattern as
 // sievekit's SIEVE_REGISTRY_URL env var on the CLI side.
@@ -15,11 +15,51 @@ export interface AddSourceResult {
   error?: string;
 }
 
-function authHeaders(session: AuthSession): HeadersInit {
+export interface MySkillInput {
+  name: string;
+  description: string;
+  category?: string;
+  tags?: string[];
+  body: string;
+  version?: string;
+}
+
+export interface MySkillResult {
+  ok: boolean;
+  error?: string;
+  detail?: string;
+}
+
+function authHeaders(session: AuthSession | null): HeadersInit {
   // The registry only understands GitHub identity today (it resolves the
-  // caller via api.github.com/user); a GitLab session has nothing to send.
-  if (session.provider !== "github") return {};
+  // caller via api.github.com/user); a GitLab session has nothing to send,
+  // same as an anonymous visitor — both just get the curated pool.
+  if (!session || session.provider !== "github") return {};
   return { Authorization: `Bearer ${session.token}` };
+}
+
+export async function listSkills(session: AuthSession | null): Promise<RegistrySkill[]> {
+  const res = await fetch(`${REGISTRY_URL}/api/skills`, { headers: authHeaders(session) });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function createMySkill(session: AuthSession, input: MySkillInput): Promise<MySkillResult> {
+  const res = await fetch(`${REGISTRY_URL}/api/my-skills`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(session) },
+    body: JSON.stringify(input),
+  });
+  const data = (await res.json().catch(() => ({}))) as { error?: string; detail?: string };
+  return { ok: res.ok, error: data.error, detail: data.detail };
+}
+
+export async function deleteMySkill(session: AuthSession, name: string): Promise<boolean> {
+  const res = await fetch(`${REGISTRY_URL}/api/my-skills/${encodeURIComponent(name)}`, {
+    method: "DELETE",
+    headers: authHeaders(session),
+  });
+  return res.ok;
 }
 
 export async function listSources(session: AuthSession): Promise<RegistrySource[]> {

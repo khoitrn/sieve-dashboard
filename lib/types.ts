@@ -38,6 +38,19 @@ export interface FileStatus {
   present: boolean;
 }
 
+export interface RegistrySkill {
+  source_id: string;
+  name: string;
+  category: string;
+  tier: SkillTier;
+  description: string;
+  tags: string[];
+  version: string;
+  last_reviewed: string;
+  body: string;
+  updated_at: string;
+}
+
 export interface RegistrySource {
   id: string;
   repo_url: string;
