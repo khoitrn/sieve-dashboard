@@ -2,29 +2,14 @@
 
 import { useState } from "react";
 import { SkillBody } from "@/components/SkillBody";
+import { PILLARS, pillarRank } from "@/lib/pillars";
 import { bucketByDay, skillMatches } from "@/lib/sieve-repo";
 import type { HistoryEvent, SieveSkill } from "@/lib/types";
-
-const DOMAIN_ORDER = ["planning", "testing", "review", "debugging", "verification", "maintenance"] as const;
-
-const DOMAIN_VAR: Record<(typeof DOMAIN_ORDER)[number], string> = {
-  planning: "var(--cat-planning)",
-  testing: "var(--cat-testing)",
-  review: "var(--info)",
-  debugging: "var(--cat-debugging)",
-  verification: "var(--cat-verification)",
-  maintenance: "var(--cat-maintenance)",
-};
 
 const SPARK_DAYS = 14;
 
 function formatTime(ts: string) {
   return `${new Date(ts).toLocaleDateString(undefined, { month: "2-digit", day: "2-digit" })} · ${new Date(ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
-}
-
-function categoryRank(category: string) {
-  const i = DOMAIN_ORDER.indexOf(category as (typeof DOMAIN_ORDER)[number]);
-  return i === -1 ? DOMAIN_ORDER.length : i;
 }
 
 export function SkillUsagePanel({
@@ -39,7 +24,7 @@ export function SkillUsagePanel({
   history: HistoryEvent[];
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const sorted = [...skills].sort((a, b) => categoryRank(a.category) - categoryRank(b.category));
+  const sorted = [...skills].sort((a, b) => pillarRank(a.category) - pillarRank(b.category));
 
   const rows = sorted.map((skill) => {
     const matches = skillMatches(skill, history);
@@ -59,10 +44,10 @@ export function SkillUsagePanel({
         </span>
       </h2>
       <div className="cat-legend">
-        {DOMAIN_ORDER.map((d) => (
-          <span key={d}>
-            <i style={{ background: DOMAIN_VAR[d] }} />
-            {d}
+        {PILLARS.map((p) => (
+          <span key={p.id}>
+            <i style={{ background: p.colorVar }} />
+            {p.id}
           </span>
         ))}
       </div>

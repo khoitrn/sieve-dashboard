@@ -132,6 +132,12 @@ export function SourcesView() {
                 </p>
               )}
 
+              <p className="skill-detail-empty">
+                Connected sources are scanned, never reviewed — skills pulled from them show as{" "}
+                <span className="trust-chip unverified">unverified</span> in your Library, unlike curated
+                skills that pass Sieve&rsquo;s own validation gate.
+              </p>
+
               {own.length === 0 ? (
                 <p className="skill-detail-empty">
                   No sources connected yet. Add any public repo with <code className="mono">SKILL.md</code> files —

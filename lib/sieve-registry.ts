@@ -1,7 +1,7 @@
 "use client";
 
 import type { AuthSession } from "@/lib/auth";
-import type { RegistrySkill, RegistrySource } from "@/lib/types";
+import type { RegistryBundle, RegistrySkill, RegistrySource } from "@/lib/types";
 
 // Overridable so self-hosting a registry stays possible — same pattern as
 // sievekit's SIEVE_REGISTRY_URL env var on the CLI side.
@@ -40,6 +40,13 @@ function authHeaders(session: AuthSession | null): HeadersInit {
 
 export async function listSkills(session: AuthSession | null): Promise<RegistrySkill[]> {
   const res = await fetch(`${REGISTRY_URL}/api/skills`, { headers: authHeaders(session) });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+// Curated only — no auth, same visibility as the curated skill catalog.
+export async function listBundles(): Promise<RegistryBundle[]> {
+  const res = await fetch(`${REGISTRY_URL}/api/bundles`);
   if (!res.ok) return [];
   return res.json();
 }

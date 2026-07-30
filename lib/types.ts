@@ -49,6 +49,16 @@ export interface RegistrySkill {
   last_reviewed: string;
   body: string;
   updated_at: string;
+  blob_sha: string | null;
+  validated: boolean;
+}
+
+export interface RegistryBundle {
+  id: string;
+  name: string;
+  description: string;
+  skill_names: string[];
+  match_tags: string[];
 }
 
 export interface RegistrySource {
