@@ -9,7 +9,7 @@ import type { HistoryEvent, SieveSkill } from "@/lib/types";
 const SPARK_DAYS = 14;
 
 function formatTime(ts: string) {
-  return `${new Date(ts).toLocaleDateString(undefined, { month: "2-digit", day: "2-digit" })} · ${new Date(ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+  return `${new Date(ts).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })} · ${new Date(ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 export function SkillUsagePanel({
@@ -105,7 +105,15 @@ export function SkillUsagePanel({
                   </span>
                 </div>
                 <span className="last-used mono">
-                  {isGuardrail ? "—" : lastMention ? new Date(lastMention).toLocaleDateString() : "—"}
+                  {isGuardrail
+                    ? "—"
+                    : lastMention
+                      ? new Date(lastMention).toLocaleDateString("en-US", {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        })
+                      : "—"}
                 </span>
                 <svg
                   className={`row-chev${isOpen ? " open" : ""}`}
