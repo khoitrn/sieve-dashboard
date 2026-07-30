@@ -58,14 +58,14 @@ the token exchange, only Cloudflare's dev server does.
 1. **Register an OAuth App.**
    - GitHub: [github.com/settings/developers](https://github.com/settings/developers)
      → New OAuth App. Authorization callback URL: exactly
-     `http://localhost:8788/api/auth/callback/github` for local dev. GitHub
+     `http://localhost:3002/api/auth/callback/github` for local dev. GitHub
      OAuth Apps (classic) only allow one callback URL each, so make a
      second app later for the production domain — don't try to reuse the
      dev app.
    - GitLab: [gitlab.com/-/user_settings/applications](https://gitlab.com/-/user_settings/applications)
      → Add new application, scopes `read_repository` + `read_user`. GitLab
      lets you list multiple redirect URIs on one Application, so
-     `http://localhost:8788/api/auth/callback/gitlab` and the eventual prod
+     `http://localhost:3002/api/auth/callback/gitlab` and the eventual prod
      URL can both live on the same app.
 
 2. **Local secrets.** Copy `.dev.vars.example` → `.dev.vars` (gitignored)
@@ -78,22 +78,24 @@ the token exchange, only Cloudflare's dev server does.
 3. **Run it:**
    ```bash
    npm run build         # static export to ./out (also runs `wrangler types`)
-   npm run pages:dev     # wrangler pages dev ./out, on http://localhost:8788
+   npm run pages:dev     # wrangler pages dev ./out, on http://localhost:3002
    ```
    Plain `npm run dev` still works for everything except sign-in itself —
    the "Sign in" button will show "not configured" until the
    `NEXT_PUBLIC_*_CLIENT_ID` vars are set, and even then the callback needs
    `pages:dev`, not `next dev`, to actually complete.
 
-4. **Production**, once there's a real Cloudflare Pages project:
+4. **Production** — deployed at `https://sieve.khoitrn.com` (custom domain on
+   the `sieve-dashboard` Cloudflare Pages project; the `.pages.dev` URL still
+   resolves but isn't the canonical one):
    ```bash
    npx wrangler pages secret put GITHUB_CLIENT_SECRET --project-name=sieve-dashboard
    npx wrangler pages secret put GITLAB_CLIENT_SECRET --project-name=sieve-dashboard
    ```
-   plus a second, prod-only GitHub OAuth App pointed at the real domain's
-   `/api/auth/callback/github`, and `NEXT_PUBLIC_*_CLIENT_ID` /
-   `GITHUB_CLIENT_ID` / `GITLAB_CLIENT_ID` set to match in the Pages
-   project's build environment variables.
+   plus a second, prod-only GitHub OAuth App with Authorization callback URL
+   `https://sieve.khoitrn.com/api/auth/callback/github`, and
+   `NEXT_PUBLIC_*_CLIENT_ID` / `GITHUB_CLIENT_ID` / `GITLAB_CLIENT_ID` set to
+   match in the Pages project's build environment variables.
 
 ## Stack
 

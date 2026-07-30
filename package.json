@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "pages:dev": "wrangler pages dev ./out"
+    "pages:dev": "wrangler pages dev ./out --port 3002"
   },
   "dependencies": {
     "next": "16.2.12",
