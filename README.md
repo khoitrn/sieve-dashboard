@@ -4,10 +4,9 @@
 ![stack](https://img.shields.io/badge/stack-Next.js%20%2B%20Cloudflare%20Pages-blue)
 ![data](https://img.shields.io/badge/database-none-lightgrey)
 
-The hosted companion to [Sieve](https://github.com/khoitrn/sieve) — a
-read-only website with four views: browse the skill pool you'd actually
-pull into a project, connect your own skill repos, author skills by hand,
-and inspect whether a specific public repo is running the protocol.
+A free website at **[sieve.khoitrn.com](https://sieve.khoitrn.com)** for looking at [Sieve](https://github.com/khoitrn/sieve) skills without touching a terminal. Nothing to install and nothing to download — open the link, and everything is one click away in the navigation bar at the top of the page.
+
+**Is this for me?** Yes, if you just want to *look* — browse what skills are out there, see if a project you follow uses Sieve, or connect your own repo/write your own skill without opening a code editor. You don't need to already use Sieve's `npx sievekit init` command for any of this; the two are independent. Signing in is only needed for the parts that remember something about you (see below) — you can look around the whole site signed out first.
 
 Separate repo from `sievekit` on purpose: this is a hosted viewer and
 authoring surface, not a feature of the npm package. No account, no
@@ -15,33 +14,35 @@ database on this side — identity and skill data live in
 [`sieve-registry`](https://github.com/khoitrn/sieve-registry); this app is
 the UI on top of it.
 
-## The four tabs
+## The navigation bar at the top of every page
 
-| Tab | Sign-in | What it does |
+However you land on the site, the same bar sits across the top of the screen the whole time — four labeled links on the right side (**Dashboard**, **Library**, **Sources**, **Custom**), and a **Sign in** button next to them. That bar is how you get from any one view to any other; you never need to know a URL or use the browser's back button.
+
+| Tab (top of screen) | Sign in required? | What it does |
 | --- | --- | --- |
-| **Library** | optional | Your actual skill pool: curated catalog + connected sources + your own custom skills, live from the registry. Each row reads `from <source>` so curated/connected/custom are easy to tell apart. Signed out, you see the curated pool only. |
-| **Sources** | required | Connect an external repo (`owner/repo`) as a skill source. The registry walks every `SKILL.md` in its tree and folds it into your Library and onboarding recommendations — never anyone else's. |
-| **Custom** | required | Author skills in the browser: name, description, category, tags, instructions. Scoped to your GitHub identity (`custom:<login>`), not a repo — no source to connect, nothing for the sync loop to pull. You *are* the source of truth. |
-| **Dashboard** | optional | The original per-repo inspector. Point it at any public `owner/repo` and it reads `AGENTS.md`, `sieve.index.json`, `HISTORY.jsonl`, `PROGRESS.md`, and `scripts/bridge.mjs` straight from `raw.githubusercontent.com` — skill catalog, guardrail vs. catalog split, real history mentions, a 30-day activity trend. No `AGENTS.md` gets an honest empty state, never fabricated numbers. |
+| **Dashboard** | No | The original view: point it at any public `owner/repo` (type it into the box that appears next to the nav bar, or paste a `github.com/...` link) and see whether that project is set up with Sieve — its skill list, its recent activity, at a glance. |
+| **Library** | Optional | Your actual skill pool: the shared catalog, plus anything you've connected under Sources, plus anything you've written under Custom — all in one list, live. Signed out, you still see the shared catalog, just not your own additions. |
+| **Sources** | Yes | Where you connect one of *your own* repos (just type `owner/repo`) so its skills show up in your Library. This is the "hook up your own skills" step. |
+| **Custom** | Yes | Where you write a skill by hand, right in the browser — a name, a description, and the instructions — with no repo needed at all. This is the "author a skill from scratch" step. |
 
 Library, Sources, and Custom talk to the registry's API. Dashboard talks
 directly to GitHub's raw CDN and never touches the registry.
 
-## Sign-in
+## Signing in
 
-GitHub or GitLab, your choice, and optional for Dashboard — required for
-Sources and Custom, and for Library to show anything beyond the curated
-pool. No account and no database on this side: the OAuth token lives in
-your browser's `localStorage` only, never on a server. The one
-server-side step is a Cloudflare Pages Function that exchanges the OAuth
-code for a token without exposing the client secret, then hands the token
-back in a URL fragment and forgets it.
+Look for the **Sign in** button in the top-right corner, next to the navigation bar — that's the one control that unlocks Sources, Custom, and your own entries in Library. Choose GitHub or GitLab, whichever you use; either works the same way. You don't need to sign in at all to use Dashboard, or to browse the shared Library.
+
+There's nothing to set up on your end beyond clicking that button — no account to create, no password, no email. Under the hood: no database on this side, the sign-in token stays only in your own browser's local storage, and it's never seen by a server except for the one moment it's first exchanged.
 
 ## Related projects
 
 - **[sieve](https://github.com/khoitrn/sieve)** — the npm package (`npx sievekit init`). Start here.
 - **[sieve-registry](https://github.com/khoitrn/sieve-registry)** — the Worker + D1 API this app is a UI on top of.
 - **sieve-dashboard** (this repo) — the hosted UI, at [sieve.khoitrn.com](https://sieve.khoitrn.com).
+
+---
+
+Everything from here on is for people running their own copy of this site — you don't need any of it just to use [sieve.khoitrn.com](https://sieve.khoitrn.com).
 
 ## Develop
 
