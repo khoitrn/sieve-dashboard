@@ -37,6 +37,12 @@ server-side step is a Cloudflare Pages Function that exchanges the OAuth
 code for a token without exposing the client secret, then hands the token
 back in a URL fragment and forgets it.
 
+## Related projects
+
+- **[sieve](https://github.com/khoitrn/sieve)** — the npm package (`npx sievekit init`). Start here.
+- **[sieve-registry](https://github.com/khoitrn/sieve-registry)** — the Worker + D1 API this app is a UI on top of.
+- **sieve-dashboard** (this repo) — the hosted UI, at [sieve.khoitrn.com](https://sieve.khoitrn.com).
+
 ## Develop
 
 ```bash
