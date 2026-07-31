@@ -4,13 +4,11 @@
 ![stack](https://img.shields.io/badge/stack-Next.js%20%2B%20Cloudflare%20Pages-blue)
 ![data](https://img.shields.io/badge/database-none-lightgrey)
 
-### 👉 Just want to use it? Go to **[sieve.khoitrn.com](https://sieve.khoitrn.com)** — nothing to install, no sign-in needed to look around.
+### 👉 Host your own in about 15 minutes — see [Setup](#setup-run-your-own-copy) below.
 
-<!-- TODO: screenshot of the dashboard goes here, e.g. ![Sieve dashboard, Library tab](./docs/screenshot.png) -->
+<!-- TODO: screenshot of the dashboard goes here, from a local/signed-out instance, e.g. ![Sieve dashboard, Library tab](./docs/screenshot.png) -->
 
-A website for looking at [Sieve](https://github.com/khoitrn/sieve) skills without touching a terminal — browse what's available, see if a project is set up with Sieve, connect your own repo, or write a skill by hand, all in a browser.
-
-The link above is the maintainer's own personal instance — a live demo anyone's welcome to look around on, not an official hosted service. Just looking needs nothing at all. If you sign in there to connect a repo or author a skill, read [where that data actually lives](#where-does-your-data-live) first, or skip straight to [running your own copy](#run-your-own-copy-end-to-end) if you'd rather your data stayed yours — that part's optional and only matters once you're ready for it.
+A website for looking at [Sieve](https://github.com/khoitrn/sieve) skills without touching a terminal — browse what's available, see if a project is set up with Sieve, connect your own repo, or write a skill by hand, all in a browser. This repo is the app itself, meant to be **run as your own copy**: your own registry, your own sign-in, your own data. [Setup](#setup-run-your-own-copy) walks through it end to end.
 
 Separate repo from `sievekit` on purpose: this is a hosted viewer and
 authoring surface, not a feature of the npm package.
@@ -37,20 +35,15 @@ There's nothing to set up on your end beyond clicking that button — no account
 
 ## Where does your data live?
 
-This app has no database of its own — it's a UI. Everything you do under Sources or Custom gets sent to whichever **sieve-registry** the app is currently pointed at, and that's where it's actually stored (a Cloudflare D1 database). It's scoped to your own GitHub/GitLab identity — other people using the same registry never see it — but it still physically lives in *that registry's* database, not on your own machine.
+This app has no database of its own — it's a UI. Everything you do under Sources or Custom gets sent to whichever **sieve-registry** it's pointed at, and that registry's Cloudflare D1 database is where it's actually stored. It's scoped to your own GitHub/GitLab identity — nobody else using the same registry can see it — but it's still that registry's database, not your own machine, unless you deploy your own.
 
-By default, every copy of this app — including the live one at sieve.khoitrn.com — points at the maintainer's own deployed registry (`sieve-registry.khoitrn.workers.dev`). So if you sign in and connect a Source or write a Custom skill on sieve.khoitrn.com, that data is stored in the maintainer's database, not yours. That's fine for trying it out; it's worth knowing before you rely on it for anything you'd rather keep under your own control.
+Without a registry you deployed yourself, this app falls back to pointing at the maintainer's own personal instance (`sieve-registry.khoitrn.workers.dev`) — that's a private setup for the maintainer's own projects, not a public service, and it can be wiped or reset without notice. Don't build on it. Deploy your own registry (step 1 below) so the data is actually yours and stays put.
 
-The fix is to run your own registry and point your own copy of this app at it — the walkthrough below covers both.
+## Setup: run your own copy
 
-## Run your own copy, end to end
+Three things, done in order: your own registry (where Sources/Custom data lives), your own OAuth apps (so sign-in works), then this app pointed at both. About 15 minutes.
 
-Optional — most people never need this section, it's only for keeping your own data out of the maintainer's database. Three things, done in order: your own registry, your own OAuth apps, then this app pointed at both. About 15 minutes for all three; skip step 1 if you're fine using the maintainer's registry.
-
-<details>
-<summary><strong>Show the 6 setup steps</strong></summary>
-
-### 1. Deploy your own sieve-registry (optional, but this is what makes the data yours)
+### 1. Deploy your own sieve-registry
 
 Follow [sieve-registry's own Deploy steps](https://github.com/khoitrn/sieve-registry#deploy) — a handful of `wrangler` commands, no code to write. Note the URL it gives you at the end, e.g. `https://sieve-registry.<you>.workers.dev` — you'll need it in step 4.
 
@@ -79,7 +72,7 @@ cp .env.local.example .env.local
 ```
 
 - **`.dev.vars`** (server-side only, never sent to the browser): the OAuth client ID + secret from step 3, per provider.
-- **`.env.local`** (safe in the browser — just builds the "Sign in" link): the *same* client IDs again, plus `NEXT_PUBLIC_SIEVE_REGISTRY_URL` — set this to the URL from step 1 if you deployed your own registry; leave it blank to fall back to the maintainer's.
+- **`.env.local`** (safe in the browser — just builds the "Sign in" link): the *same* client IDs again, plus `NEXT_PUBLIC_SIEVE_REGISTRY_URL` — set this to the URL from step 1. Leaving it blank falls back to the maintainer's personal registry, which is exactly what step 1 exists to avoid.
 
 ### 5. Run it on localhost
 
@@ -99,15 +92,13 @@ npx wrangler pages secret put GITHUB_CLIENT_SECRET --project-name=<your-project-
 npx wrangler pages secret put GITLAB_CLIENT_SECRET --project-name=<your-project-name>
 ```
 
-then register a second, production-only OAuth App per provider pointed at your real domain (e.g. callback URL `https://<your-domain>/api/auth/callback/github`), and set `NEXT_PUBLIC_GITHUB_CLIENT_ID` / `NEXT_PUBLIC_GITLAB_CLIENT_ID` / `NEXT_PUBLIC_SIEVE_REGISTRY_URL` to match in that Cloudflare Pages project's build environment variables. This is exactly how sieve.khoitrn.com itself is deployed — same steps, just under the maintainer's own domain and OAuth apps instead of yours.
-
-</details>
+then register a second, production-only OAuth App per provider pointed at your real domain (e.g. callback URL `https://<your-domain>/api/auth/callback/github`), and set `NEXT_PUBLIC_GITHUB_CLIENT_ID` / `NEXT_PUBLIC_GITLAB_CLIENT_ID` / `NEXT_PUBLIC_SIEVE_REGISTRY_URL` to match in that Cloudflare Pages project's build environment variables.
 
 ## Related projects
 
 - **[sieve](https://github.com/khoitrn/sieve)** — the npm package (`npx sievekit init`). Start here.
 - **[sieve-registry](https://github.com/khoitrn/sieve-registry)** — the Worker + D1 API this app is a UI on top of, and what step 1 above deploys your own copy of.
-- **sieve-dashboard** (this repo) — the hosted UI. The maintainer's copy is at [sieve.khoitrn.com](https://sieve.khoitrn.com); see [Run your own copy](#run-your-own-copy-end-to-end) for yours.
+- **sieve-dashboard** (this repo) — the app itself. See [Setup](#setup-run-your-own-copy) above to run your own copy.
 
 ## Stack
 
